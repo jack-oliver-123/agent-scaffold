@@ -282,7 +282,7 @@ export async function initializeProject(
     if (options.validateCommands !== false) {
       await validateDerivedCommands(
         stage,
-        options.offlineInstall !== false,
+        options.offlineInstall === true,
         options.retainDependencies === true,
       );
     }

@@ -7,6 +7,17 @@ interface HashedFile {
   content: Buffer;
 }
 
+const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
+
+function canonicalContent(content: Buffer): Buffer | string {
+  if (content.includes(0)) return content;
+  try {
+    return utf8Decoder.decode(content).replaceAll("\r\n", "\n");
+  } catch {
+    return content;
+  }
+}
+
 function comparePaths(left: HashedFile, right: HashedFile): number {
   if (left.relativePath < right.relativePath) return -1;
   if (left.relativePath > right.relativePath) return 1;
@@ -37,7 +48,7 @@ export async function hashDirectory(directory: string): Promise<string> {
   const hash = createHash("sha256");
   for (const file of files) {
     hash.update(file.relativePath);
-    hash.update(file.content);
+    hash.update(canonicalContent(file.content));
   }
   return hash.digest("hex");
 }

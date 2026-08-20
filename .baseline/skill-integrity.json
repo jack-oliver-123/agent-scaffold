@@ -2,51 +2,51 @@
   "schemaVersion": 1,
   "skills": {
     "grilling": {
-      "contentHash": "0b8c10332fd8d0e9d41251ca666eec890e38b09a35fe39df852924457db32a2a",
+      "contentHash": "e98f109bca3d8889f673d9f32bf84086f85a70ff9e241f8a34a4560a07ab5a39",
       "sourceKind": "upstream",
       "upstreamComputedHash": "4fa026e5979770347b3357ff5139e1e41d21c3a9f7335e9cd2811cb5b8d32f2f"
     },
     "grill-with-docs": {
-      "contentHash": "c69309d02f52d222565024809ff8ba1bccf202448e45d608e9f8887e37889366",
+      "contentHash": "c2bec2d816e6496ef7374c3e1fd63f6e47dc0e1c8d03989216392fca093a68b9",
       "sourceKind": "baseline-owned"
     },
     "domain-modeling": {
-      "contentHash": "dc55ed5a0004a781fcc2de772228f21001738570af0df260bafae1e744775124",
+      "contentHash": "18a4b1d415a1851129c26a65cbd9ff63978e2cf66752c05e70b8889a6b002d24",
       "sourceKind": "upstream",
       "upstreamComputedHash": "336547f3ff285e822fc70b69b170dc58bceef9c8ed5fad18de0046287d6be837"
     },
     "codebase-design": {
-      "contentHash": "d2dbe7a89308d3fb743d706b6cd58a916744e9e50c21c1267db28cfee3f04fdc",
+      "contentHash": "d1762a59416f411caa1e9a38dc07f091487b0491c15ba6031c1e33beee8e004d",
       "sourceKind": "upstream",
       "upstreamComputedHash": "caea3cb8a8281ff829fd1a2b985044e77601b62f301adf43f689ccfc74c15f6f"
     },
     "diagnosing-bugs": {
-      "contentHash": "17e896bd90292afc5e67df04664c8fe7261eb2a2ea012d0bc97c391281ddc6f8",
+      "contentHash": "251e085e9d789c31d8b526929e62f57f668a21c2cc0d7bf185f0fba591a8ac60",
       "sourceKind": "upstream",
       "upstreamComputedHash": "dcaaa3eb81195329f65f27574d9a67dc776160dd2e4d7798d1afb1e4a5f3695a"
     },
     "tdd": {
-      "contentHash": "4db6bc7c2d0f6722744581046375cf07b882bb7c35b2751b48a000b0a9aa964a",
+      "contentHash": "640e03b03610a0cd793a9474f41715802e1a5ba439681c970b03ba7b190cd817",
       "sourceKind": "upstream",
       "upstreamComputedHash": "c1ed8cd854c64d4d226097255d3fa662dae4a758a1462fadd63cc10e413d88d7"
     },
     "code-review": {
-      "contentHash": "98ec0d2e2eea5e866bf4f5bcc50192df8da36e3d477c97b06f31a7a2ba42d435",
+      "contentHash": "19b97436badcccd942152eb8fadad598f20444c4ee7d40eb971f36d65be8ba59",
       "sourceKind": "upstream",
       "upstreamComputedHash": "b4f17857c85ca60af1df7d0b623dd03c2a48419f6123e714f3d9748ca744a1bf"
     },
     "resolving-merge-conflicts": {
-      "contentHash": "8b69520ed2376c42602ca654607c15e6779d953c9365d38ee37fff8a09fcd00b",
+      "contentHash": "a8ddc5a6b083bbbada1e711b97b47de4bbf7d51415b4cca38d41853061dcd576",
       "sourceKind": "upstream",
       "upstreamComputedHash": "436698459190d8e9f03dc32ada08401b56e352fb6a19bf71a2227fad8b80d98f"
     },
     "research": {
-      "contentHash": "82e3650ad560963e90ea4845f5ee301bef7e2ccfd528f7eda8e29c888da99849",
+      "contentHash": "d293faf4e4da791b8046cd2eed5b4dce46f591f1a26be4099a55b968b5dbe9c9",
       "sourceKind": "upstream",
       "upstreamComputedHash": "2c8b768d5f0309eaea9f92ef740101e813645b39aef88fb82733a52eae23dc0b"
     },
     "writing-for-agents": {
-      "contentHash": "f5dc99be37096c700ff8db3669acdc86921742f6cc078e694c659440881cb00a",
+      "contentHash": "8365ebe1d0c343d3d46970526f30fcf7c5e0c5e49fd39a3c882977024626ff3c",
       "sourceKind": "upstream",
       "upstreamComputedHash": "831e996c177c6c5233eb3bb472a33edee2b3ce1ee5a6d7e8b696c1c3fb4eda3d"
     }
