@@ -4,7 +4,7 @@
   "baselineVersion": "0.1.0",
   "defaultProfile": "typescript-node",
   "sourceRepository": "https://github.com/jack-oliver-123/agent-scaffold",
-  "sourceCommit": "unreleased",
+  "sourceCommit": "467e5d97e6469371897498f477f998b34e4b0f96",
   "skills": [
     {
       "name": "grilling",

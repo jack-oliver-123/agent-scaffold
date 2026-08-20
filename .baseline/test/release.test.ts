@@ -16,6 +16,10 @@ describe("Baseline release readiness", () => {
   it("rejects unreleased provenance placeholders", async () => {
     const fixture = await createTemplateFixture();
     fixtures.push(fixture);
+    const configPath = path.join(fixture, "baseline.config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.sourceCommit = "unreleased";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
 
     await expect(checkReleaseReadiness(fixture)).rejects.toThrow("sourceCommit");
   });
