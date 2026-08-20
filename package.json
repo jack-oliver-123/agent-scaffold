@@ -1,6 +1,6 @@
 {
   "name": "codex-scaffold",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "A versioned development baseline for coding-agent projects.",
@@ -13,11 +13,14 @@
     "baseline:skills:sync": "tsx .baseline/src/cli.ts skills-sync",
     "baseline:skills:check": "tsx .baseline/src/cli.ts skills-check",
     "baseline:release:check": "tsx .baseline/src/cli.ts release-check",
-    "format": "biome format --write .baseline/src .baseline/test",
-    "lint": "biome check .baseline/src .baseline/test",
+    "format": "biome format --write .baseline/src .baseline/test packages/create-agent-scaffold/src packages/create-agent-scaffold/test packages/create-agent-scaffold/scripts packages/create-agent-scaffold/tsup.config.ts",
+    "lint": "biome check .baseline/src .baseline/test packages/create-agent-scaffold/src packages/create-agent-scaffold/test packages/create-agent-scaffold/scripts packages/create-agent-scaffold/tsup.config.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "build": "tsc -p tsconfig.build.json",
+    "build:baseline": "tsc -p tsconfig.build.json",
+    "build:creator": "corepack pnpm --filter create-agent-scaffold build",
+    "build": "corepack pnpm build:baseline && corepack pnpm build:creator",
+    "creator:pack:test": "node packages/create-agent-scaffold/scripts/pack-and-test.mjs",
     "check": "corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test && corepack pnpm build && corepack pnpm baseline:skills:check"
   },
   "devDependencies": {

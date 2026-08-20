@@ -1,10 +1,26 @@
 {
   "$schema": "./.baseline/schemas/baseline-config.schema.json",
   "schemaVersion": 1,
-  "baselineVersion": "0.1.0",
+  "baselineVersion": "0.2.0",
   "defaultProfile": "typescript-node",
   "sourceRepository": "https://github.com/jack-oliver-123/agent-scaffold",
-  "sourceCommit": "467e5d97e6469371897498f477f998b34e4b0f96",
+  "sourceCommit": "unreleased",
+  "agents": [
+    {
+      "id": "codex",
+      "displayName": "Codex",
+      "defaultSelected": true,
+      "skillsDirectory": ".agents/skills",
+      "ownedPaths": [".agents", ".codex"]
+    },
+    {
+      "id": "claude",
+      "displayName": "Claude Code",
+      "defaultSelected": false,
+      "skillsDirectory": ".claude/skills",
+      "ownedPaths": [".claude", "CLAUDE.md"]
+    }
+  ],
   "skills": [
     {
       "name": "grilling",

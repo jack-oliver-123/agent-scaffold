@@ -1,0 +1,44 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm check
+      - run: corepack pnpm creator:pack:test
+
+  publish:
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - run: corepack pnpm install --frozen-lockfile
+      - run: corepack pnpm baseline:release:check
+      - run: node packages/create-agent-scaffold/scripts/check-release-tag.mjs "${{ github.ref_name }}"
+      - run: npm publish --provenance --access public
+        working-directory: packages/create-agent-scaffold

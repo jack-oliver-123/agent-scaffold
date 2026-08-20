@@ -35,4 +35,24 @@ describe("Baseline release readiness", () => {
 
     await expect(checkReleaseReadiness(fixture)).resolves.toBeUndefined();
   });
+
+  it("rejects a Project Creator version that differs from the Baseline Release", async () => {
+    const fixture = await createTemplateFixture();
+    fixtures.push(fixture);
+    const configPath = path.join(fixture, "baseline.config.json");
+    const config = JSON.parse(await readFile(configPath, "utf8"));
+    config.sourceCommit = "0123456789abcdef0123456789abcdef01234567";
+    await writeFile(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf8");
+    const creatorPackagePath = path.join(
+      fixture,
+      "packages",
+      "create-agent-scaffold",
+      "package.json",
+    );
+    const creatorPackage = JSON.parse(await readFile(creatorPackagePath, "utf8"));
+    creatorPackage.version = "0.3.0";
+    await writeFile(creatorPackagePath, `${JSON.stringify(creatorPackage, null, 2)}\n`, "utf8");
+
+    await expect(checkReleaseReadiness(fixture)).rejects.toThrow("Creator package version");
+  });
 });

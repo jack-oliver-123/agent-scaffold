@@ -83,3 +83,23 @@ _Avoid_: Skills lockfile, version file, initialization record
 **Migration Guide**:
 A version-specific, reviewable procedure for applying a Baseline Upgrade, with optional mechanical scripts when they reduce repeat work without hiding changes.
 _Avoid_: Upgrade command, release notes, template diff
+
+**Project Creator**:
+A package-runner entry point that acquires an Agent Development Baseline release and performs Baseline Initialization in a new local directory through one short command.
+_Avoid_: Clone command, bootstrap script, template installer
+
+**Supported Agent**:
+A coding agent with a maintained Agent Adapter that the Project Creator can offer during interactive initialization; the initial supported set is Codex and Claude Code.
+_Avoid_: Compatible agent, available provider
+
+**Selected Agent Set**:
+The one or more Supported Agents chosen for a Derived Project during interactive initialization.
+_Avoid_: Installed agents, enabled providers, Default Skill Set
+
+**Agent Catalog**:
+The versioned set of Supported Agents declared by a Baseline Release and offered by the Project Creator.
+_Avoid_: Agent menu, hard-coded providers, Selected Agent Set
+
+**Creator Payload**:
+The immutable, self-contained Baseline Release embedded in a Project Creator package and used to create a Derived Project without fetching a source repository.
+_Avoid_: Template checkout, repository archive, generated files

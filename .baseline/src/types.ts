@@ -1,4 +1,12 @@
-export type AgentName = "codex" | "claude";
+export type AgentName = string;
+
+export interface AgentDefinition {
+  id: AgentName;
+  displayName: string;
+  defaultSelected: boolean;
+  skillsDirectory: string;
+  ownedPaths: string[];
+}
 
 export interface UpstreamSkillSource {
   kind: "upstream";
@@ -24,6 +32,7 @@ export interface BaselineConfig {
   defaultProfile: string;
   sourceRepository: string;
   sourceCommit: string;
+  agents: AgentDefinition[];
   skills: SkillDefinition[];
 }
 
@@ -62,4 +71,10 @@ export interface InitAnswers {
   packageName: string;
   description: string;
   profile: string;
+  agents?: AgentName[];
+}
+
+export interface CreatorProvenance {
+  package: string;
+  version: string;
 }

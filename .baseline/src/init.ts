@@ -2,7 +2,7 @@ import { spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { loadBaselineConfig, loadProfile } from "./config.js";
+import { loadBaselineConfig, loadProfile, selectAgents } from "./config.js";
 import {
   copyRepositoryToStage,
   pathExists,
@@ -12,11 +12,20 @@ import {
 } from "./files.js";
 import { hashText } from "./hash.js";
 import { pruneSkillsLock, syncSkills } from "./skills.js";
-import type { InitAnswers, SkillIntegrityLock } from "./types.js";
+import type {
+  AgentDefinition,
+  BaselineConfig,
+  CreatorProvenance,
+  InitAnswers,
+  SkillIntegrityLock,
+} from "./types.js";
 
 export interface InitializeOptions {
   dryRun?: boolean;
   validateCommands?: boolean;
+  offlineInstall?: boolean;
+  retainDependencies?: boolean;
+  creator?: CreatorProvenance;
 }
 
 const packageNamePattern = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/;
@@ -28,16 +37,12 @@ const sourceOnlyPaths = [
   "CONTEXT.md",
   "docs",
   "migrations",
+  "packages",
   "profiles",
 ];
 const requiredDerivedPaths = [
-  ".agents/skills",
-  ".claude/settings.json",
-  ".claude/skills",
-  ".codex/config.toml",
   ".github/workflows/ci.yml",
   "AGENTS.md",
-  "CLAUDE.md",
   "README.md",
   "baseline.lock.json",
   "skills-lock.json",
@@ -76,6 +81,9 @@ export function validateInitAnswers(answers: InitAnswers): void {
   }
   if (answers.description.trim().length === 0) throw new Error("Project description is required.");
   if (!/^[a-z0-9-]+$/.test(answers.profile)) throw new Error("Profile name is invalid.");
+  if (answers.agents && new Set(answers.agents).size !== answers.agents.length) {
+    throw new Error("Selected Agent ids must be unique.");
+  }
 }
 
 export function getInitializationPlan(answers: InitAnswers): string[] {
@@ -83,6 +91,7 @@ export function getInitializationPlan(answers: InitAnswers): string[] {
     `Apply Stack Profile: ${answers.profile}`,
     `Set project name: ${answers.projectName}`,
     `Set package name: ${answers.packageName}`,
+    `Select Agents: ${answers.agents?.join(", ") ?? "all Supported Agents"}`,
     "Project the Default Skill Set into Codex and Claude directories",
     "Write baseline.lock.json and prune skills-lock.json",
     "Remove baseline-authoring docs, profiles, migrations, and tooling",
@@ -107,7 +116,8 @@ async function renderTemplateDirectory(
 ): Promise<void> {
   for (const entry of await readdir(source, { withFileTypes: true })) {
     const sourcePath = path.join(source, entry.name);
-    const destinationPath = path.join(destination, entry.name);
+    const destinationName = entry.name === "gitignore.template" ? ".gitignore" : entry.name;
+    const destinationPath = path.join(destination, destinationName);
     if (entry.isDirectory()) {
       await mkdir(destinationPath, { recursive: true });
       await renderTemplateDirectory(sourcePath, destinationPath, replacements);
@@ -127,10 +137,13 @@ async function renderTemplateDirectory(
 async function writeBaselineLock(
   root: string,
   answers: InitAnswers,
+  agents: readonly AgentDefinition[],
   integrity: SkillIntegrityLock,
+  creator?: CreatorProvenance,
 ): Promise<void> {
   const config = await loadBaselineConfig(root);
   const skills = config.skills
+    .filter((skill) => integrity.skills[skill.name] !== undefined)
     .map((skill) => ({
       name: skill.name,
       contentHash: integrity.skills[skill.name]?.contentHash ?? "",
@@ -149,6 +162,8 @@ async function writeBaselineLock(
       commit: config.sourceCommit,
     },
     profile: answers.profile,
+    agents: agents.map((agent) => agent.id),
+    ...(creator ? { creator } : {}),
     defaultSkillSetHash: hashText(JSON.stringify(skills)),
     skills,
   });
@@ -160,10 +175,40 @@ async function removeSourceOnlyFiles(root: string): Promise<void> {
   }
 }
 
-async function validateDerivedStructure(root: string): Promise<void> {
+async function removeUnselectedAdapters(
+  root: string,
+  config: BaselineConfig,
+  selectedAgents: readonly AgentDefinition[],
+): Promise<void> {
+  const selectedIds = new Set(selectedAgents.map((agent) => agent.id));
+  for (const agent of config.agents) {
+    if (selectedIds.has(agent.id)) continue;
+    for (const ownedPath of agent.ownedPaths) {
+      await rm(resolveInside(root, ownedPath), { recursive: true, force: true });
+    }
+  }
+}
+
+async function validateDerivedStructure(
+  root: string,
+  config: BaselineConfig,
+  selectedAgents: readonly AgentDefinition[],
+): Promise<void> {
   for (const relativePath of requiredDerivedPaths) {
     if (!(await pathExists(resolveInside(root, relativePath)))) {
       throw new Error(`Derived Project is missing ${relativePath}.`);
+    }
+  }
+  const selectedIds = new Set(selectedAgents.map((agent) => agent.id));
+  for (const agent of config.agents) {
+    for (const ownedPath of agent.ownedPaths) {
+      const exists = await pathExists(resolveInside(root, ownedPath));
+      if (selectedIds.has(agent.id) && !exists) {
+        throw new Error(`Derived Project is missing ${agent.id} path ${ownedPath}.`);
+      }
+      if (!selectedIds.has(agent.id) && exists) {
+        throw new Error(`Derived Project retained unselected ${agent.id} path ${ownedPath}.`);
+      }
     }
   }
   for (const relativePath of sourceOnlyPaths) {
@@ -172,7 +217,7 @@ async function validateDerivedStructure(root: string): Promise<void> {
     }
   }
 
-  const renderedFiles = ["README.md", "AGENTS.md", "CLAUDE.md", "package.json"];
+  const renderedFiles = ["README.md", "AGENTS.md", "package.json"];
   for (const relativePath of renderedFiles) {
     const content = await readFile(resolveInside(root, relativePath), "utf8");
     if (/\{\{[A-Z_]+\}\}/.test(content)) {
@@ -181,10 +226,18 @@ async function validateDerivedStructure(root: string): Promise<void> {
   }
 }
 
-async function validateDerivedCommands(root: string): Promise<void> {
-  run(root, "corepack", ["pnpm", "install", "--frozen-lockfile", "--offline"]);
+async function validateDerivedCommands(
+  root: string,
+  offline: boolean,
+  retainDependencies: boolean,
+): Promise<void> {
+  const installArguments = ["pnpm", "install", "--frozen-lockfile"];
+  if (offline) installArguments.push("--offline");
+  run(root, "corepack", installArguments);
   run(root, "corepack", ["pnpm", "check"]);
-  await rm(path.join(root, "node_modules"), { recursive: true, force: true });
+  if (!retainDependencies) {
+    await rm(path.join(root, "node_modules"), { recursive: true, force: true });
+  }
   await rm(path.join(root, "dist"), { recursive: true, force: true });
 }
 
@@ -201,6 +254,8 @@ export async function initializeProject(
   }
 
   const config = await loadBaselineConfig(resolvedRoot);
+  const selectedAgents = selectAgents(config, answers.agents);
+  const selectedAgentIds = selectedAgents.map((agent) => agent.id);
   const profile = await loadProfile(resolvedRoot, answers.profile || config.defaultProfile);
   const plan = getInitializationPlan(answers);
   if (options.dryRun) return plan;
@@ -218,12 +273,19 @@ export async function initializeProject(
       DESCRIPTION: answers.description.trim(),
     });
 
-    const integrity = await syncSkills(stage, true);
-    await writeBaselineLock(stage, answers, integrity);
-    await pruneSkillsLock(stage);
+    const integrity = await syncSkills(stage, true, selectedAgentIds);
+    await writeBaselineLock(stage, answers, selectedAgents, integrity, options.creator);
+    await pruneSkillsLock(stage, selectedAgentIds);
     await removeSourceOnlyFiles(stage);
-    await validateDerivedStructure(stage);
-    if (options.validateCommands !== false) await validateDerivedCommands(stage);
+    await removeUnselectedAdapters(stage, config, selectedAgents);
+    await validateDerivedStructure(stage, config, selectedAgents);
+    if (options.validateCommands !== false) {
+      await validateDerivedCommands(
+        stage,
+        options.offlineInstall !== false,
+        options.retainDependencies === true,
+      );
+    }
     await replaceWorkingTree(resolvedRoot, stage);
     return plan;
   } finally {

@@ -1,10 +1,10 @@
 import { mkdir, readFile, rm } from "node:fs/promises";
 import path from "node:path";
-import { loadBaselineConfig, loadSkillsLock } from "./config.js";
+import { loadBaselineConfig, loadSkillsLock, selectAgents } from "./config.js";
 import { copyDirectory, pathExists, resolveInside, writeJson } from "./files.js";
 import { hashDirectory } from "./hash.js";
 import type {
-  AgentName,
+  AgentDefinition,
   SkillDefinition,
   SkillIntegrityLock,
   SkillLockEntry,
@@ -13,9 +13,8 @@ import type {
 
 const integrityPath = path.join(".baseline", "skill-integrity.json");
 
-function destinationFor(root: string, agent: AgentName, skillName: string): string {
-  const adapterDirectory = agent === "codex" ? ".agents" : ".claude";
-  return resolveInside(root, path.join(adapterDirectory, "skills", skillName));
+function destinationFor(root: string, agent: AgentDefinition, skillName: string): string {
+  return resolveInside(root, path.join(agent.skillsDirectory, skillName));
 }
 
 function lockEntryFor(skill: SkillDefinition, lock: SkillsLock): SkillLockEntry | undefined {
@@ -34,30 +33,40 @@ async function validateSkillEntry(root: string, skill: SkillDefinition): Promise
   return hashDirectory(source);
 }
 
-export async function syncSkills(root: string, pruneCodex = false): Promise<SkillIntegrityLock> {
+export async function syncSkills(
+  root: string,
+  pruneAdapters = false,
+  requestedAgents?: readonly string[],
+): Promise<SkillIntegrityLock> {
   const config = await loadBaselineConfig(root);
+  const selectedAgents = selectAgents(config, requestedAgents);
+  const selectedIds = new Set(selectedAgents.map((agent) => agent.id));
+  const activeSkills = config.skills.filter((skill) =>
+    skill.agents.some((agent) => selectedIds.has(agent)),
+  );
   const lock = await loadSkillsLock(root);
   const integrity: SkillIntegrityLock = { schemaVersion: 1, skills: {} };
   const stagedSources = new Map<string, string>();
   const sourceHashes = new Map<string, string>();
 
-  for (const skill of config.skills) {
+  for (const skill of activeSkills) {
     sourceHashes.set(skill.name, await validateSkillEntry(root, skill));
   }
 
-  if (pruneCodex) {
+  if (pruneAdapters) {
     const cacheRoot = resolveInside(root, path.join(".baseline-tmp", "skill-sources"));
     await rm(cacheRoot, { recursive: true, force: true });
-    for (const skill of config.skills) {
+    for (const skill of activeSkills) {
       const cachedSource = path.join(cacheRoot, skill.name);
       await copyDirectory(resolveInside(root, skill.source.path), cachedSource);
       stagedSources.set(skill.name, cachedSource);
     }
-    await rm(resolveInside(root, path.join(".agents", "skills")), { recursive: true, force: true });
+    for (const agent of config.agents) {
+      await rm(resolveInside(root, agent.skillsDirectory), { recursive: true, force: true });
+    }
   }
-  await rm(resolveInside(root, path.join(".claude", "skills")), { recursive: true, force: true });
 
-  for (const skill of config.skills) {
+  for (const skill of activeSkills) {
     const originalSource = resolveInside(root, skill.source.path);
     const source = stagedSources.get(skill.name) ?? originalSource;
     const contentHash = sourceHashes.get(skill.name);
@@ -75,7 +84,7 @@ export async function syncSkills(root: string, pruneCodex = false): Promise<Skil
       ...(upstreamEntry ? { upstreamComputedHash: upstreamEntry.computedHash } : {}),
     };
 
-    for (const agent of skill.agents) {
+    for (const agent of selectedAgents.filter((candidate) => skill.agents.includes(candidate.id))) {
       const destination = destinationFor(root, agent, skill.name);
       if (path.resolve(source) === path.resolve(destination)) continue;
       await copyDirectory(source, destination);
@@ -83,7 +92,7 @@ export async function syncSkills(root: string, pruneCodex = false): Promise<Skil
   }
 
   await writeJson(resolveInside(root, integrityPath), integrity);
-  if (pruneCodex) {
+  if (pruneAdapters) {
     await rm(resolveInside(root, ".baseline-tmp"), { recursive: true, force: true });
   }
   return integrity;
@@ -91,6 +100,7 @@ export async function syncSkills(root: string, pruneCodex = false): Promise<Skil
 
 export async function checkSkills(root: string): Promise<SkillIntegrityLock> {
   const config = await loadBaselineConfig(root);
+  const selectedAgents = selectAgents(config);
   const lock = await loadSkillsLock(root);
   const stored = JSON.parse(
     await readFile(resolveInside(root, integrityPath), "utf8"),
@@ -113,13 +123,13 @@ export async function checkSkills(root: string): Promise<SkillIntegrityLock> {
       }
     }
 
-    for (const agent of skill.agents) {
+    for (const agent of selectedAgents.filter((candidate) => skill.agents.includes(candidate.id))) {
       const destination = destinationFor(root, agent, skill.name);
       if (!(await pathExists(destination))) {
-        throw new Error(`Skill ${skill.name} is missing from the ${agent} adapter.`);
+        throw new Error(`Skill ${skill.name} is missing from the ${agent.id} adapter.`);
       }
       if ((await hashDirectory(destination)) !== sourceHash) {
-        throw new Error(`Skill ${skill.name} has a stale ${agent} projection.`);
+        throw new Error(`Skill ${skill.name} has a stale ${agent.id} projection.`);
       }
     }
   }
@@ -127,10 +137,17 @@ export async function checkSkills(root: string): Promise<SkillIntegrityLock> {
   return stored;
 }
 
-export async function pruneSkillsLock(root: string): Promise<void> {
+export async function pruneSkillsLock(
+  root: string,
+  requestedAgents?: readonly string[],
+): Promise<void> {
   const config = await loadBaselineConfig(root);
   const lock = await loadSkillsLock(root);
-  const selected = config.skills.filter((skill) => skill.source.kind === "upstream");
+  const selectedIds = new Set(selectAgents(config, requestedAgents).map((agent) => agent.id));
+  const selected = config.skills.filter(
+    (skill) =>
+      skill.source.kind === "upstream" && skill.agents.some((agent) => selectedIds.has(agent)),
+  );
   const skills = Object.fromEntries(
     selected.map((skill) => {
       const entry = lock.skills[skill.name];
@@ -142,6 +159,8 @@ export async function pruneSkillsLock(root: string): Promise<void> {
 }
 
 export async function ensureAdapterDirectories(root: string): Promise<void> {
-  await mkdir(path.join(root, ".agents", "skills"), { recursive: true });
-  await mkdir(path.join(root, ".claude", "skills"), { recursive: true });
+  const config = await loadBaselineConfig(root);
+  for (const agent of config.agents) {
+    await mkdir(resolveInside(root, agent.skillsDirectory), { recursive: true });
+  }
 }

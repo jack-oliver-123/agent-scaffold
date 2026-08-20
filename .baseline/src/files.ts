@@ -40,8 +40,8 @@ export async function copyRepositoryToStage(root: string, stage: string): Promis
     filter: (source) => {
       const relative = path.relative(root, source);
       if (relative.length === 0) return true;
-      const first = relative.split(path.sep)[0];
-      return first !== undefined && !protectedEntries.has(first) && first !== "dist";
+      const segments = relative.split(path.sep);
+      return !segments.some((segment) => protectedEntries.has(segment) || segment === "dist");
     },
   });
 }

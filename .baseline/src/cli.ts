@@ -44,6 +44,7 @@ async function collectAnswers(root: string, parsed: ParsedArguments): Promise<In
       packageName: await ask("package-name", "Package name: "),
       description: await ask("description", "One-line purpose: "),
       profile: parsed.values.get("profile") ?? config.defaultProfile,
+      agents: config.agents.map((agent) => agent.id),
     };
   } finally {
     terminal.close();

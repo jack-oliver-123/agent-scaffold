@@ -2,6 +2,7 @@ node_modules/
 dist/
 coverage/
 .baseline-tmp/
+packages/create-agent-scaffold/payload/
 CLAUDE.local.md
 .claude/settings.local.json
 .env

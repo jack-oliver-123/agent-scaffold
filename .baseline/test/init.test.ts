@@ -53,7 +53,7 @@ describe("Baseline Initialization", () => {
     expect(
       JSON.parse(await readFile(path.join(fixture, "baseline.lock.json"), "utf8")),
     ).toMatchObject({
-      baselineVersion: "0.1.0",
+      baselineVersion: "0.2.0",
       profile: "typescript-node",
     });
     await expect(readFile(path.join(fixture, "baseline.config.json"), "utf8")).rejects.toThrow();
@@ -71,6 +71,56 @@ describe("Baseline Initialization", () => {
     await expect(initializeProject(fixture, answers, { validateCommands: false })).rejects.toThrow(
       "already a Derived Project",
     );
+  });
+
+  it("creates only the selected Codex Agent Adapter", async () => {
+    const fixture = await createTemplateFixture();
+    fixtures.push(fixture);
+
+    await initializeProject(
+      fixture,
+      { ...answers, agents: ["codex"] },
+      { validateCommands: false },
+    );
+
+    expect(await readdir(path.join(fixture, ".agents", "skills"))).toHaveLength(10);
+    await expect(readdir(path.join(fixture, ".claude"))).rejects.toThrow();
+    await expect(readFile(path.join(fixture, "CLAUDE.md"), "utf8")).rejects.toThrow();
+    expect(
+      JSON.parse(await readFile(path.join(fixture, "baseline.lock.json"), "utf8")),
+    ).toMatchObject({
+      agents: ["codex"],
+    });
+  });
+
+  it("creates only the selected Claude Code Agent Adapter", async () => {
+    const fixture = await createTemplateFixture();
+    fixtures.push(fixture);
+
+    await initializeProject(
+      fixture,
+      { ...answers, agents: ["claude"] },
+      { validateCommands: false },
+    );
+
+    expect(await readdir(path.join(fixture, ".claude", "skills"))).toHaveLength(10);
+    expect(await readFile(path.join(fixture, "CLAUDE.md"), "utf8")).toContain("@AGENTS.md");
+    await expect(readdir(path.join(fixture, ".agents"))).rejects.toThrow();
+    await expect(readdir(path.join(fixture, ".codex"))).rejects.toThrow();
+    expect(
+      JSON.parse(await readFile(path.join(fixture, "baseline.lock.json"), "utf8")),
+    ).toMatchObject({
+      agents: ["claude"],
+    });
+  });
+
+  it("rejects an empty Selected Agent Set", async () => {
+    const fixture = await createTemplateFixture();
+    fixtures.push(fixture);
+
+    await expect(
+      initializeProject(fixture, { ...answers, agents: [] }, { validateCommands: false }),
+    ).rejects.toThrow("at least one Supported Agent");
   });
 
   it("installs and checks the generated project before replacing the working tree", async () => {

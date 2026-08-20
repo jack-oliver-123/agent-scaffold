@@ -18,6 +18,16 @@ export async function checkReleaseReadiness(root: string): Promise<void> {
     throw new Error("sourceCommit must be the full 40-character release commit SHA.");
   }
 
+  const creatorPackage = JSON.parse(
+    await readFile(path.join(root, "packages", "create-agent-scaffold", "package.json"), "utf8"),
+  ) as { name?: unknown; version?: unknown };
+  if (
+    creatorPackage.name !== "create-agent-scaffold" ||
+    creatorPackage.version !== config.baselineVersion
+  ) {
+    throw new Error("Creator package version must equal the Baseline Release version.");
+  }
+
   const changelog = await readFile(path.join(root, "CHANGELOG.md"), "utf8");
   if (!changelog.includes(`## ${config.baselineVersion}`)) {
     throw new Error(`CHANGELOG.md must contain a ${config.baselineVersion} release section.`);

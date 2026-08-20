@@ -15,6 +15,9 @@
   "include": [
     ".baseline/src/**/*.ts",
     ".baseline/test/**/*.ts",
+    "packages/create-agent-scaffold/src/**/*.ts",
+    "packages/create-agent-scaffold/test/**/*.ts",
+    "packages/create-agent-scaffold/tsup.config.ts",
     "profiles/typescript-node/template/src/**/*.ts",
     "profiles/typescript-node/template/test/**/*.ts"
   ]
