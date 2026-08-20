@@ -1,8 +1,18 @@
+import { realpathSync } from "node:fs";
 import { cp, mkdir, mkdtemp, readdir, rm, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
 const protectedEntries = new Set([".git", "node_modules"]);
+
+export function pathsReferToSameLocation(left: string, right: string): boolean {
+  const canonicalLeft = realpathSync.native(path.resolve(left));
+  const canonicalRight = realpathSync.native(path.resolve(right));
+  if (process.platform === "win32") {
+    return canonicalLeft.toLowerCase() === canonicalRight.toLowerCase();
+  }
+  return canonicalLeft === canonicalRight;
+}
 
 export function resolveInside(root: string, relativePath: string): string {
   const resolvedRoot = path.resolve(root);

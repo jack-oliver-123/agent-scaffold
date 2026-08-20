@@ -6,6 +6,7 @@ import { loadBaselineConfig, loadProfile, selectAgents } from "./config.js";
 import {
   copyRepositoryToStage,
   pathExists,
+  pathsReferToSameLocation,
   replaceWorkingTree,
   resolveInside,
   writeJson,
@@ -101,7 +102,7 @@ export function getInitializationPlan(answers: InitAnswers): string[] {
 
 function assertCleanGitRepository(root: string): void {
   const topLevel = run(root, "git", ["rev-parse", "--show-toplevel"]);
-  if (path.resolve(topLevel) !== path.resolve(root)) {
+  if (!pathsReferToSameLocation(topLevel, root)) {
     throw new Error("Run Baseline Initialization from the Git repository root.");
   }
   if (run(root, "git", ["status", "--porcelain"]).length > 0) {
