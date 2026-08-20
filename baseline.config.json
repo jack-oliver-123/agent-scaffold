@@ -1,0 +1,108 @@
+{
+  "$schema": "./.baseline/schemas/baseline-config.schema.json",
+  "schemaVersion": 1,
+  "baselineVersion": "0.1.0",
+  "defaultProfile": "typescript-node",
+  "sourceRepository": "https://github.com/jack-oliver-123/agent-scaffold",
+  "sourceCommit": "unreleased",
+  "skills": [
+    {
+      "name": "grilling",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/grilling",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "grill-with-docs",
+      "source": {
+        "kind": "baseline-owned",
+        "path": ".baseline/skills/grill-with-docs"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "domain-modeling",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/domain-modeling",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "codebase-design",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/codebase-design",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "diagnosing-bugs",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/diagnosing-bugs",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "tdd",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/tdd",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "code-review",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/code-review",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "resolving-merge-conflicts",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/resolving-merge-conflicts",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "research",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/research",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    },
+    {
+      "name": "writing-for-agents",
+      "source": {
+        "kind": "upstream",
+        "path": ".agents/skills/writing-for-agents",
+        "license": "MIT",
+        "licenseUrl": "https://github.com/mattpocock/skills/blob/main/LICENSE"
+      },
+      "agents": ["codex", "claude"]
+    }
+  ]
+}

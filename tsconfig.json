@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node", "vitest/globals"]
+  },
+  "include": [
+    ".baseline/src/**/*.ts",
+    ".baseline/test/**/*.ts",
+    "profiles/typescript-node/template/src/**/*.ts",
+    "profiles/typescript-node/template/test/**/*.ts"
+  ]
+}

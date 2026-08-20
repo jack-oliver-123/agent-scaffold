@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/codex-scaffold/profile.schema.json",
+  "title": "Agent Development Baseline profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "name", "description", "templateDirectory"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "description": { "type": "string", "minLength": 1 },
+    "templateDirectory": { "type": "string", "minLength": 1 }
+  }
+}

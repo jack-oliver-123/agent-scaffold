@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/codex-scaffold/baseline-lock.schema.json",
+  "title": "Derived Project baseline provenance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "baselineVersion",
+    "source",
+    "profile",
+    "defaultSkillSetHash",
+    "skills"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "baselineVersion": { "type": "string" },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": { "type": "string" },
+        "commit": { "type": "string" }
+      }
+    },
+    "profile": { "type": "string" },
+    "defaultSkillSetHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "skills": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "contentHash"],
+        "properties": {
+          "name": { "type": "string" },
+          "contentHash": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+        }
+      }
+    }
+  }
+}

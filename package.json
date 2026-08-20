@@ -1,0 +1,30 @@
+{
+  "name": "codex-scaffold",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "A versioned development baseline for coding-agent projects.",
+  "packageManager": "pnpm@11.22.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "baseline:init": "tsx .baseline/src/cli.ts init",
+    "baseline:skills:sync": "tsx .baseline/src/cli.ts skills-sync",
+    "baseline:skills:check": "tsx .baseline/src/cli.ts skills-check",
+    "baseline:release:check": "tsx .baseline/src/cli.ts release-check",
+    "format": "biome format --write .baseline/src .baseline/test",
+    "lint": "biome check .baseline/src .baseline/test",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "build": "tsc -p tsconfig.build.json",
+    "check": "corepack pnpm lint && corepack pnpm typecheck && corepack pnpm test && corepack pnpm build && corepack pnpm baseline:skills:check"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.9",
+    "@types/node": "24.13.3",
+    "tsx": "4.23.12",
+    "typescript": "7.0.2",
+    "vitest": "4.1.11"
+  }
+}

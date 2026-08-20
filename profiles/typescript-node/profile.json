@@ -1,0 +1,7 @@
+{
+  "$schema": "../../.baseline/schemas/profile.schema.json",
+  "schemaVersion": 1,
+  "name": "typescript-node",
+  "description": "A private, single-package TypeScript project running on Node.js 24 LTS.",
+  "templateDirectory": "template"
+}

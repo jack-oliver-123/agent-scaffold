@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/codex-scaffold/baseline-config.schema.json",
+  "title": "Agent Development Baseline configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "baselineVersion",
+    "defaultProfile",
+    "sourceRepository",
+    "sourceCommit",
+    "skills"
+  ],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": 1 },
+    "baselineVersion": { "type": "string", "pattern": "^0\\.[0-9]+\\.[0-9]+$" },
+    "defaultProfile": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "sourceRepository": { "type": "string", "minLength": 1 },
+    "sourceCommit": { "type": "string", "minLength": 1 },
+    "skills": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["name", "source", "agents"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+          "source": {
+            "type": "object",
+            "required": ["kind", "path"],
+            "properties": {
+              "kind": { "enum": ["upstream", "baseline-owned", "agent-specific"] },
+              "path": { "type": "string", "minLength": 1 },
+              "license": { "type": "string" },
+              "licenseUrl": { "type": "string", "format": "uri" }
+            }
+          },
+          "agents": {
+            "type": "array",
+            "items": { "enum": ["codex", "claude"] },
+            "uniqueItems": true
+          }
+        }
+      }
+    }
+  }
+}
