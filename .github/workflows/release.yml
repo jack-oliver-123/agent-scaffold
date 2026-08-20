@@ -16,10 +16,11 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
+          package-manager-cache: false
       - run: corepack pnpm install --frozen-lockfile
       - run: corepack pnpm check
       - run: corepack pnpm creator:pack:test
@@ -32,11 +33,12 @@ jobs:
       contents: read
       id-token: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
+          package-manager-cache: false
       - run: corepack pnpm install --frozen-lockfile
       - run: corepack pnpm baseline:release:check
       - run: node packages/create-agent-scaffold/scripts/check-release-tag.mjs "${{ github.ref_name }}"

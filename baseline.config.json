@@ -4,7 +4,7 @@
   "baselineVersion": "0.2.0",
   "defaultProfile": "typescript-node",
   "sourceRepository": "https://github.com/jack-oliver-123/agent-scaffold",
-  "sourceCommit": "unreleased",
+  "sourceCommit": "abfb951c3c42b6b00fd46c773dceb21a74546a85",
   "agents": [
     {
       "id": "codex",

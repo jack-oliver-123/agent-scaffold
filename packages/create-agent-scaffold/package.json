@@ -3,6 +3,15 @@
   "version": "0.2.0",
   "description": "Interactively create a coding-agent-ready project.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jack-oliver-123/agent-scaffold.git",
+    "directory": "packages/create-agent-scaffold"
+  },
+  "homepage": "https://github.com/jack-oliver-123/agent-scaffold#readme",
+  "bugs": {
+    "url": "https://github.com/jack-oliver-123/agent-scaffold/issues"
+  },
   "bin": {
     "create-agent-scaffold": "dist/cli.js"
   },
